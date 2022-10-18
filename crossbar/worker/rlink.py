@@ -79,6 +79,9 @@ class BridgeSession(ApplicationSession):
             :param details:
             :return:
             """
+            if sub_details["uri"].startswith("wamp."):
+                return
+
             if sub_details["id"] in self._subs:
                 # this should not happen actually, but not sure ..
                 self.log.error('on_subscription_create: sub ID {sub_id} already in map {method}',
@@ -191,13 +194,11 @@ class BridgeSession(ApplicationSession):
         @inlineCallbacks
         def forward_current_subs():
             # get current subscriptions on the router
-            #
             subs = yield self.call("wamp.subscription.list")
             for sub_id in subs['exact']:
                 sub = yield self.call("wamp.subscription.get", sub_id)
-
-                if not sub['uri'].startswith("wamp."):
-                    yield on_subscription_create(sub_id, sub)
+                assert sub['id'] == sub_id, "Logic error, subscription IDs don't match"
+                yield on_subscription_create(self._session_id, sub)
 
         @inlineCallbacks
         def on_remote_join(_session, _details):
