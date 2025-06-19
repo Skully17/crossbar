@@ -91,9 +91,10 @@ class BridgeSession(ApplicationSession):
                                method=hltype(BridgeSession._setup_event_forwarding))
                 return
 
+            sub_details_local = copy.deepcopy(sub_details)
             if sub_id not in self._subs:
-                self._subs[sub_id] = sub_details
-                self._subs[sub_id]["sub"] = None
+                sub_details_local["sub"] = None
+                self._subs[sub_id] = sub_details_local
 
             uri = sub_details['uri']
             ERR_MSG = [None]
@@ -167,7 +168,7 @@ class BridgeSession(ApplicationSession):
 
             if sub_id not in self._subs:
                 self.log.info("subscription already gone: {uri}", uri=sub_details['uri'])
-                yield sub.unregister()
+                yield sub.unsubscribe()
             else:
                 self._subs[sub_id]["sub"] = sub
 
@@ -288,9 +289,10 @@ class BridgeSession(ApplicationSession):
                                method=hltype(BridgeSession._setup_invocation_forwarding))
                 return
 
+            reg_details_local = copy.deepcopy(reg_details)
             if reg_id not in self._regs:
-                self._regs[reg_id] = reg_details
-                self._regs[reg_id]['reg'] = None
+                reg_details_local["reg"] = None
+                self._regs[reg_id] = reg_details_local
 
             uri = reg_details['uri']
             ERR_MSG = [None]
@@ -718,9 +720,9 @@ class RLinkRemoteSession(BridgeSession):
 
 class RLink(object):
     def __init__(self, id, config, started=None, started_by=None, local=None, remote=None):
-        assert type(id) == str
+        assert isinstance(id, str)
         assert isinstance(config, RLinkConfig)
-        assert started is None or type(started) == int
+        assert started is None or isinstance(started, int)
         assert started_by is None or isinstance(started_by, RLinkConfig)
         assert local is None or isinstance(local, RLinkLocalSession)
         assert remote is None or isinstance(remote, RLinkLocalSession)
@@ -809,8 +811,8 @@ class RLinkConfig(object):
         :rtype: :class:`crossbar.edge.worker.rlink.RLinkConfig`
         """
         # assert isinstance(personality, Personality)
-        assert type(obj) == dict
-        assert id is None or type(id) == str
+        assert isinstance(obj, dict)
+        assert id is None or isinstance(id, str)
 
         if id:
             obj['id'] = id
@@ -832,7 +834,7 @@ class RLinkConfig(object):
         authid = obj.get('authid', None)
         exclude_authid = obj.get('exclude_authid', [])
         for aid in exclude_authid:
-            assert type(aid) == str
+            assert isinstance(aid, str)
         forward_local_events = obj.get('forward_local_events', True)
         forward_remote_events = obj.get('forward_remote_events', True)
         forward_local_invocations = obj.get('forward_local_invocations', True)
@@ -909,7 +911,7 @@ class RLinkManager(object):
 
     @inlineCallbacks
     def start_link(self, link_id, link_config, caller):
-        assert type(link_id) == str
+        assert isinstance(link_id, str)
         assert isinstance(link_config, RLinkConfig)
         assert isinstance(caller, SessionIdent)
 
