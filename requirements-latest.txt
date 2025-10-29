@@ -84,5 +84,5 @@ watchdog>=2.2.1
 werkzeug>=2.2.2
 wsaccel>=0.6.4; platform_python_implementation=='CPython'
 xbr>=21.2.1
-zlmdb @ git+https://github.com/crossbario/zlmdb.git@master#egg=zlmdb
+zlmdb==23.1.1
 zope.interface>=5.5.2
